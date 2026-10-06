@@ -68,7 +68,7 @@ export function isAlpha(src: string) {
     code <= 0x06ff &&
     src !== "؛" &&
     src !== "،" &&
-    src !== "؟";
+    src !== "؟" ;
   return isLatin || isArabic;
 }
 
@@ -80,7 +80,7 @@ export function isNum(src: string) {
 
 export function isSkippable(src: string) {
   return (
-    src == " " || src == "\n" || src == "\t" || src == "\r" || src == "    "
+    src == " " || src == "\n" || src == "\t" || src == "\r"
   );
 }
 
@@ -98,9 +98,9 @@ export function tokenize(sourceCode: string): Token[] {
     } else if (src[0] === "}") {
       tokens.push(createToken(src.shift(), TokenType.RightBrace));
     } else if (src[0] === "[") {
-      tokens.push(createToken(src.shift(), TokenType.RightBracket));
-    } else if (src[0] === "]") {
       tokens.push(createToken(src.shift(), TokenType.LeftBracket));
+    } else if (src[0] === "]") {
+      tokens.push(createToken(src.shift(), TokenType.RightBracket));
     } else if (src[0] === "+") {
       tokens.push(createToken(src.shift(), TokenType.AddingOperator));
     } else if (src[0] === "-") {
@@ -117,8 +117,6 @@ export function tokenize(sourceCode: string): Token[] {
       tokens.push(createToken(src.shift(), TokenType.Colon));
     } else if (src[0] === "،") {
       tokens.push(createToken(src.shift(), TokenType.Comma));
-    } else if (src[0] === "_") {
-      tokens.push(createToken(src.shift(), TokenType.Underscore));
     } else {
       if (isNum(src[0])) {
         let num = "";
@@ -128,7 +126,7 @@ export function tokenize(sourceCode: string): Token[] {
         tokens.push(createToken(num, TokenType.Number));
       } else if (isAlpha(src[0])) {
         let ident = "";
-        while (src.length > 0 && isAlpha(src[0])) {
+        while (src.length > 0 && (isAlpha(src[0]) || isNum(src[0]) || src[0] === "_")) {
           ident += src.shift();
         }
         const reserved = KEYWORD[ident];
