@@ -51,10 +51,8 @@ export const KEYWORD: Record<string, TokenType> = {
   ارجع: TokenType.Return,
 };
 
-const code = "دع س = 12";
 
 // Helper Functions
-// 
 
 export function createToken(value = "", type: TokenType): Token {
   return { value, type };
@@ -147,5 +145,3 @@ export function tokenize(sourceCode: string): Token[] {
   tokens.push({ type: TokenType.EOF, value: "نهاية الملف" });
   return tokens;
 }
-
-console.log(tokenize(code));
