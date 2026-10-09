@@ -328,5 +328,3 @@ export default class Parser {
   }
 }
 
-
-console.log(JSON.stringify(new Parser().produceAST("متغير س = 2 + 3 * 4؛"), null, 2));
