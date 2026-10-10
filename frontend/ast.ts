@@ -4,6 +4,10 @@ export type NodeType =
   | "VarDeclaration"
   | "FunctionDeclaration"
   | "ReturnStatement"
+  | "BlockStatement"
+  | "IfStatement"
+  | "WhileStatement"
+  | "ForStatement"
   // Expressions
   | "AssignmentExpression"
   | "MemberExpression"
@@ -13,7 +17,8 @@ export type NodeType =
   | "Property"
   | "ObjectLiteral"
   | "NumberLiteral"
-  | "Identifier";
+  | "Identifier"
+  | "StringLiteral";
 
 export interface Statement {
   kind: NodeType;
@@ -41,6 +46,11 @@ export interface Identifier extends Expression {
 export interface NumberLiteral extends Expression {
   kind: "NumberLiteral";
   value: number;
+}
+
+export interface StringLiteral extends Expression {
+  kind: "StringLiteral";
+  value: string;
 }
 
 export interface Property extends Expression {
@@ -91,3 +101,30 @@ export interface ReturnStatement extends Statement {
   kind: "ReturnStatement";
   value: Expression;
 }
+
+export interface BlockStatement extends Statement {
+  kind: "BlockStatement";
+  body: Statement[];
+}
+
+export interface IfStatement extends Statement {
+  kind: "IfStatement";
+  condition: Expression;
+  consequent: BlockStatement;
+  alternate?: BlockStatement | IfStatement;
+}
+
+export interface WhileStatement extends Statement {
+  kind: "WhileStatement";
+  condition: Expression;
+  body: BlockStatement;
+}
+
+export interface ForStatement extends Statement {
+  kind: "ForStatement";
+  init?: Statement;
+  condition?: Expression;
+  update?: Expression;
+  body: BlockStatement;
+}
+

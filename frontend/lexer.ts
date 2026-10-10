@@ -57,14 +57,14 @@ export interface Token {
 export class LexError extends Error {}
 
 export const KEYWORD: Record<string, TokenType> = {
-  "متغير": TokenType.Let,
-  "ثابت": TokenType.Const,
-  "دالة": TokenType.Function,
-  "ارجع": TokenType.Return,
-  "إذا": TokenType.If,
-  "وإلا": TokenType.Else,
-  "طالما": TokenType.While,
-  "لكل": TokenType.For,
+  متغير: TokenType.Let,
+  ثابت: TokenType.Const,
+  دالة: TokenType.Function,
+  ارجع: TokenType.Return,
+  إذا: TokenType.If,
+  وإلا: TokenType.Else,
+  طالما: TokenType.While,
+  لكل: TokenType.For,
 };
 
 const SINGLE_CHAR: Record<string, TokenType> = {
@@ -176,7 +176,7 @@ export function tokenize(sourceCode: string): Token[] {
       next();
       tokens.push(createToken("!=", TokenType.NotEquals));
     } else if (char === '"') {
-      next();
+      next(); // opening quote
       let text = "";
       while (src.length > 0 && src[0] !== '"') {
         if (src[0] === "\\") {
@@ -187,17 +187,17 @@ export function tokenize(sourceCode: string): Token[] {
           text += next();
         }
       }
-      if (src.length === 0) {
+      if (src[0] !== '"') {
         throw new LexError('نص غير منتهي: علامة الاقتباس " الختامية مفقودة');
       }
+      next();
       tokens.push(createToken(text, TokenType.String));
     } else if (isNum(char)) {
       let num = "";
       let seenDot = false;
       while (
         src.length > 0 &&
-        (isNum(src[0]) ||
-          (src[0] === "." && !seenDot && isNum(src[1] ?? "")))
+        (isNum(src[0]) || (src[0] === "." && !seenDot && isNum(src[1] ?? "")))
       ) {
         if (src[0] === ".") seenDot = true;
         num += next();

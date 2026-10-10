@@ -1,9 +1,14 @@
-import { Statement } from "../frontend/ast.ts";
-import { Environment } from "./env.ts";
+import type { Statement } from "../frontend/ast.ts";
+import type { Environment } from "./env.ts";
 
 export interface NumberValue {
   type: "number";
   value: number;
+}
+
+export interface StringValue {
+  type: "string";
+  value: string;
 }
 
 export interface BooleanValue {
@@ -37,6 +42,7 @@ export interface NativeFunctionValue {
 
 export type RuntimeValue =
   | NumberValue
+  | StringValue
   | BooleanValue
   | NullValue
   | ObjectValue
@@ -49,6 +55,10 @@ export function makeNumber(num: number): NumberValue {
   return { type: "number", value: num };
 }
 
+export function makeString(text: string): StringValue {
+  return { type: "string", value: text };
+}
+
 export function makeBoolean(bool: boolean): BooleanValue {
   return { type: "boolean", value: bool };
 }
@@ -56,7 +66,6 @@ export function makeBoolean(bool: boolean): BooleanValue {
 export function makeNull(): NullValue {
   return { type: "null", value: null };
 }
-
 
 export function makeObject(properties: Map<string, RuntimeValue>): ObjectValue {
   return { type: "object", properties };

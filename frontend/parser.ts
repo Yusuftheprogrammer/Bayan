@@ -13,6 +13,11 @@ import {
   Property,
   ObjectLiteral,
   NumberLiteral,
+  BlockStatement,
+  IfStatement,
+  WhileStatement,
+  ForStatement,
+  StringLiteral,
 } from "./ast.ts";
 import { Token, tokenize, TokenType } from "./lexer.ts";
 
@@ -78,12 +83,27 @@ export default class Parser {
         return this.parseFunctionDeclaration();
       case TokenType.Return:
         return this.parseReturnStatement();
+      case TokenType.If:
+        return this.parseIfStatement();
+      case TokenType.While:
+        return this.parseWhileStatement();
+      case TokenType.For:
       default: {
         const expression = this.parseExpression();
         this.expect(TokenType.SemiColon, "يجب انهاء الجملة بعلامة ؛");
         return expression;
       }
     }
+  }
+
+  private parseBlock(): BlockStatement {
+    this.expect(TokenType.LeftBrace, "كان من المتوقع '{'");
+    const body: Statement[] = [];
+    while (this.notEOF() && this.at().type !== TokenType.RightBrace) {
+      body.push(this.parseStatement());
+    }
+    this.expect(TokenType.RightBrace, "كان من المتوقع '}'");
+    return { kind: "BlockStatement", body };
   }
 
   private parseVarDeclaration(): VarDeclaration {
@@ -136,6 +156,66 @@ export default class Parser {
     return { kind: "ReturnStatement", value };
   }
 
+  private parseIfStatement(): IfStatement {
+    this.eat();
+    this.expect(TokenType.LeftParen, "كان من المتوقع '(' بعد إذا");
+    const condition = this.parseExpression();
+    this.expect(TokenType.RightParen, "كان من المتوقع ')' بعد الشرط");
+    const consequent = this.parseBlock();
+
+    let alternate: IfStatement | BlockStatement | undefined;
+    if (this.at().type === TokenType.Else) {
+      this.eat();
+      alternate =
+        this.at().type === TokenType.If
+          ? this.parseIfStatement()
+          : this.parseBlock();
+    }
+    return { kind: "IfStatement", condition, consequent, alternate };
+  }
+
+  private parseWhileStatement(): WhileStatement {
+    this.eat();
+    this.expect(TokenType.LeftParen, "كان من المتوقع '(' بعد طالما");
+    const condition = this.parseExpression();
+    this.expect(TokenType.RightParen, "كان من المتوقع ')' بعد الشرط");
+    const body = this.parseBlock();
+    return { kind: "WhileStatement", condition, body };
+  }
+
+  private parseForStatement(): ForStatement {
+    this.eat();
+    this.expect(TokenType.LeftParen, "كان من المتوقع '(' بعد لكل");
+
+    let init: Statement | undefined;
+    if (this.at().type === TokenType.SemiColon) {
+      this.eat();
+    } else if (
+      this.at().type === TokenType.Let ||
+      this.at().type === TokenType.Const
+    ) {
+      init = this.parseVarDeclaration();
+    } else {
+      init = this.parseExpression();
+      this.expect(TokenType.SemiColon, "كان من المتوقع '؛' بعد جزء البداية");
+    }
+
+    let condition: Expression | undefined;
+    if (this.at().type !== TokenType.SemiColon) {
+      condition = this.parseExpression();
+    }
+    this.expect(TokenType.SemiColon, "كان من المتوقع '؛' بعد الشرط");
+
+    let update: Expression | undefined;
+    if (this.at().type !== TokenType.RightParen) {
+      update = this.parseExpression();
+    }
+    this.expect(TokenType.RightParen, "كان من المتوقع ')' بعد رأس الحلقة");
+
+    const body = this.parseBlock();
+    return { kind: "ForStatement", init, condition, update, body };
+  }
+
   // ---------- Expressions ----------
 
   private parseExpression(): Expression {
@@ -184,6 +264,22 @@ export default class Parser {
     }
 
     return left;
+  }
+
+  private parseEquality(): Expression {
+    return this.parseBinary(() => this.parseRelational(), [TokenType.Equals]);
+  }
+
+  private parseRelational(): Expression {
+    return this.parseBinary(
+      () => this.parseAddtiveAndSubtractive(),
+      [
+        TokenType.LessThan,
+        TokenType.GreaterThan,
+        TokenType.LessThanOrEqual,
+        TokenType.GreaterThanOrEqual,
+      ],
+    );
   }
 
   private parseAddtiveAndSubtractive(): Expression {
@@ -269,6 +365,14 @@ export default class Parser {
         };
         return node;
       }
+      case TokenType.String: {
+        this.eat();
+        const node: StringLiteral = {
+          kind: "StringLiteral",
+          value: token.value,
+        };
+        return node;
+      }
       case TokenType.LeftParen: {
         this.eat();
         const inner = this.parseExpression();
@@ -327,4 +431,3 @@ export default class Parser {
     return { kind: "Program", body };
   }
 }
-
