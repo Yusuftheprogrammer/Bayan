@@ -88,6 +88,7 @@ export default class Parser {
       case TokenType.While:
         return this.parseWhileStatement();
       case TokenType.For:
+        return this.parseForStatement();
       default: {
         const expression = this.parseExpression();
         this.expect(TokenType.SemiColon, "يجب انهاء الجملة بعلامة ؛");
@@ -223,7 +224,7 @@ export default class Parser {
   }
 
   private parseAssignment(): Expression {
-    const left = this.parseAddtiveAndSubtractive();
+    const left = this.parseEquality();
 
     if (this.at().type === TokenType.EqualOperator) {
       if (left.kind !== "Identifier" && left.kind !== "MemberExpression") {
@@ -267,7 +268,7 @@ export default class Parser {
   }
 
   private parseEquality(): Expression {
-    return this.parseBinary(() => this.parseRelational(), [TokenType.Equals]);
+    return this.parseBinary(() => this.parseRelational(), [TokenType.Equals, TokenType.NotEquals]);
   }
 
   private parseRelational(): Expression {
