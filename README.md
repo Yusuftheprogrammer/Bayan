@@ -104,20 +104,6 @@ Runtime values (`runtime/values.ts`) are tagged objects like `{ type: "number", 
 
 Syntax errors and runtime errors are separate error types and are reported in Arabic.
 
-## Project layout
-
-```
-frontend/
-  ast.ts          
-  lexer.ts        
-  parser.ts      
-runtime/
-  values.ts      
-  environment.ts  
-  interpreter.ts 
-main.ts           command-line entry point (Deno)
-web.ts            browser entry point
-```
 
 ## Run it in the browser
 
